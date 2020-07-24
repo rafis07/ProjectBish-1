@@ -742,7 +742,7 @@ async def lists(gdrive):
             )
             return
     else:
-        page_size = 50  # default page_size is 50
+        page_size = 15  # default page_size is 15
     checker = gdrive.pattern_match.group(2)
     if checker != "":
         if checker.startswith("-p"):
