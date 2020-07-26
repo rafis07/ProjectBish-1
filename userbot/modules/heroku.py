@@ -35,7 +35,6 @@ async def dyno_manage(dyno):
         await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno on <your app name>'`")
         return
     else:
-        exe = dyno.pattern_match.group(1)
         HEROKU_APP_NAME = exe
         app = heroku.app(HEROKU_APP_NAME)
         try:
@@ -75,7 +74,6 @@ async def dyno_manage(dyno):
         await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno restart <your app name>'`")
         return
     else:
-        exe = dyno.pattern_match.group(1)
         HEROKU_APP_NAME = exe
         app = heroku.app(HEROKU_APP_NAME)
         try:
@@ -118,7 +116,6 @@ async def dyno_manage(dyno):
         await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno off <your app name>'`")
         return
     else:
-        exe = dyno.pattern_match.group(1)
         HEROKU_APP_NAME = exe
         app = heroku.app(HEROKU_APP_NAME)
         """
