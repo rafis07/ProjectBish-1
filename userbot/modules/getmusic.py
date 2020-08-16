@@ -318,4 +318,7 @@ CMD_HELP.update(
         ">`.net now`"
         "\nUsage: Download current LastFM scrobble use `@WooMaiBot`.\n\n"
         ">`.sdd <Spotify/Deezer Link>`"
-        "\nUsage: Download music from Spotify or Deezer use `@MusicHuntersBot`."})
+        "\nUsage: Download music from Spotify or Deezer use `@MusicHuntersBot`.\n\n"
+        ">`.deez` <spotify/deezer link> FORMAT\n"
+        "Usage: Download music from deezer or spotify.\n"
+        "**Format** `FLAC`, `MP3_320`, `MP3_256`, `MP3_128`."})
