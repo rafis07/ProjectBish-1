@@ -135,16 +135,25 @@ async def bot_ver(event):
             revout = str(stdout.decode().strip()) \
                 + str(stderr.decode().strip())
 
-            await event.edit("`Userbot Version: "
-                             f"{verout}"
-                             "` \n"
-                             "`Revision: "
-                             f"{revout}"
-                             "`")
-        else:
-            await event.edit(
-                "Shame that you don't have git, you're running - 'v1.beta.4' anyway!"
+            com = await asyncrunapp(
+                "git",
+                "log",
+                "--pretty='%h : %s'",
+                "-1",
+                stdout=asyncPIPE,
+                stderr=asyncPIPE,
             )
+            stdout, stderr = await com.communicate()
+            comout = str(stdout.decode().strip()) \
+                + str(stderr.decode().strip())
+
+        await event.edit(f"`Userbot Version: {verout}`\n"
+                         f"`Revision: {revout}`\n"
+                         f"`Latest commit: {comout}`")
+    else:
+        await event.edit(
+            "Shame that you don't have git, You're running `v1.beta.5` anyway"
+        )
 
 
 @register(outgoing=True, pattern=r"^\.pip(?: |$)(.*)")
