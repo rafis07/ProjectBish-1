@@ -188,7 +188,7 @@ async def pipcheck(pip):
             await pip.edit("`Use .help pip to see an example`")
 
 
-@register(outgoing=True, pattern=r"^.(alive|on)$")
+@register(outgoing=True, pattern=r"^\.(alive|on)$")
 async def amireallyalive(alive):
     """ For .alive command, check if the bot is running.  """
     logo = ALIVE_LOGO
