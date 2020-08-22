@@ -1,4 +1,4 @@
-""" command: .compress """
+"""command: .compress"""
 #
 
 import asyncio
@@ -68,7 +68,7 @@ async def _(event):
 
 @register(outgoing=True, pattern=r"^\.addzip(?: |$)(.*)")
 async def addzip(add):
-    """ Add file to zip list """
+    """Add file to zip list"""
     # Prevent Channel Bug to use update
     if add.is_channel and not add.is_group:
         await event.edit("`compress Command isn't permitted on channels`")

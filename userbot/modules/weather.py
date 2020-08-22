@@ -3,7 +3,7 @@
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for getting the weather of a city. """
+"""Userbot module for getting the weather of a city."""
 
 import json
 from requests import get
@@ -31,8 +31,8 @@ else:
 
 
 async def get_tz(con):
-    """ Get time zone of the given country. """
-    """ Credits: @aragon12 and @zakaryan2004. """
+    """Get time zone of the given country."""
+    """Credits: @aragon12 and @zakaryan2004."""
     for c_code in c_n:
         if con == c_n[c_code]:
             return tz(c_tz[c_code][0])
@@ -45,7 +45,7 @@ async def get_tz(con):
 
 @register(outgoing=True, pattern=r"^\.weather(?: |$)(.*)")
 async def get_weather(weather):
-    """ For .weather command, gets the current weather of a city. """
+    """For .weather command, gets the current weather of a city."""
 
     if not OWM_API:
         return await weather.edit(
@@ -146,7 +146,7 @@ async def setlang(wlang):
 
 @register(outgoing=True, pattern=r"^\.wtr(?: |$)(.*)")
 async def get_wtr(wtr):
-    """ For .wtr command, gets the current weather of a city. """
+    """For .wtr command, gets the current weather of a city."""
 
     if not wtr.pattern_match.group(1):
         CITY = DEFCITY

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-""" - ProjectBish Google Drive managers - """
+"""ProjectBish Google Drive managers"""
 import asyncio
 import base64
 import io
@@ -101,13 +101,13 @@ logger.setLevel(logging.ERROR)
 
 @register(pattern=r"^\.gdauth(?: |$)", outgoing=True)
 async def generate_credentials(gdrive):
-    """ - Only generate once for long run - """
+    """Only generate once for long run"""
     if helper.get_credentials(str(gdrive.from_id)) is not None:
         await gdrive.edit("`You already authorized token...`")
         await asyncio.sleep(1.5)
         await gdrive.delete()
         return False
-    """ - Generate credentials - """
+    """Generate credentials"""
     if G_DRIVE_DATA is not None:
         try:
             configs = json.loads(G_DRIVE_DATA)
@@ -119,7 +119,7 @@ async def generate_credentials(gdrive):
             )
             return False
     else:
-        """ - Only for old user - """
+        """Only for old user"""
         if G_DRIVE_CLIENT_ID is None and G_DRIVE_CLIENT_SECRET is None:
             await gdrive.edit(
                 "`[AUTHENTICATE - ERROR]`\n\n"
@@ -158,7 +158,7 @@ async def generate_credentials(gdrive):
         await asyncio.sleep(3.5)
         await gdrive.client.delete_messages(gdrive.chat_id, msg.id)
         await gdrive.client.delete_messages(BOTLOG_CHATID, [url_msg.id, r.id])
-        """ - Unpack credential objects into strings - """
+        """Unpack credential objects into strings"""
         creds = base64.b64encode(pickle.dumps(creds)).decode()
         await gdrive.edit("`Credentials created...`")
     helper.save_credentials(str(gdrive.from_id), creds)
@@ -167,15 +167,15 @@ async def generate_credentials(gdrive):
 
 
 async def create_app(gdrive):
-    """ - Create google drive service app - """
+    """Create google drive service app"""
     creds = helper.get_credentials(str(gdrive.from_id))
     if creds is not None:
-        """ - Repack credential objects from strings - """
+        """Repack credential objects from strings"""
         creds = pickle.loads(base64.b64decode(creds.encode()))
     if not (creds and creds.valid):
         if creds and creds.expired and creds.refresh_token:
             await gdrive.edit("`Refreshing credentials...`")
-            """ - Refresh credentials - """
+            """Refresh credentials"""
             creds.refresh(Request())
             helper.save_credentials(str(gdrive.from_id),
                                     base64.b64encode(pickle.dumps(creds)).decode())
@@ -187,7 +187,7 @@ async def create_app(gdrive):
 
 @register(pattern=r"^\.gdreset(?: |$)", outgoing=True)
 async def reset_credentials(gdrive):
-    """ - Reset credentials or change account - """
+    """Reset credentials or change account"""
     await gdrive.edit("`Resetting information...`")
     helper.clear_credentials(str(gdrive.from_id))
     await gdrive.edit("`Done...`")
@@ -197,12 +197,12 @@ async def reset_credentials(gdrive):
 
 
 async def get_raw_name(file_path):
-    """ - Get file_name from file_path - """
+    """Get file_name from file_path"""
     return file_path.split("/")[-1]
 
 
 async def get_mimeType(name):
-    """ - Check mimeType given file - """
+    """Check mimeType given file"""
     mimeType = guess_type(name)[0]
     if not mimeType:
         mimeType = "text/plain"
@@ -212,7 +212,7 @@ async def get_mimeType(name):
 async def download(gdrive, service, uri=None):
     global is_cancelled
     reply = ""
-    """ - Download files to local then upload - """
+    """Download files to local then upload"""
     if not isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
         required_file_name = None
@@ -335,7 +335,7 @@ async def download(gdrive, service, uri=None):
 async def download_gdrive(gdrive, service, uri):
     reply = ""
     global is_cancelled
-    """ - remove drivesdk and export=download from link - """
+    """remove drivesdk and export=download from link"""
     if not isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.mkdir(TEMP_DOWNLOAD_DIRECTORY)
     if "&export=download" in uri:
@@ -355,7 +355,7 @@ async def download_gdrive(gdrive, service, uri):
                     file_Id = uri.split("uc?export=download&confirm=")[
                         1].split("id=")[1]
                 except IndexError:
-                    """ - if error parse in url, assume given value is Id - """
+                    """if error parse in url, assume given value is Id"""
                     file_Id = uri
     try:
         file = await get_information(service, file_Id)
@@ -585,11 +585,11 @@ async def create_dir(service, folder_name):
         if parent_Id is not None:
             pass
     except NameError:
-        """ - Fallback to G_DRIVE_FOLDER_ID else root dir - """
+        """Fallback to G_DRIVE_FOLDER_ID else root dir"""
         if G_DRIVE_FOLDER_ID is not None:
             metadata["parents"] = [G_DRIVE_FOLDER_ID]
     else:
-        """ - Override G_DRIVE_FOLDER_ID because parent_Id not empty - """
+        """Override G_DRIVE_FOLDER_ID because parent_Id not empty"""
         metadata["parents"] = [parent_Id]
     folder = (
         service.files() .create(
@@ -614,14 +614,14 @@ async def upload(gdrive, service, file_path, file_name, mimeType):
         if parent_Id is not None:
             pass
     except NameError:
-        """ - Fallback to G_DRIVE_FOLDER_ID else root dir - """
+        """Fallback to G_DRIVE_FOLDER_ID else root dir"""
         if G_DRIVE_FOLDER_ID is not None:
             body["parents"] = [G_DRIVE_FOLDER_ID]
     else:
-        """ - Override G_DRIVE_FOLDER_ID because parent_Id not empty - """
+        """Override G_DRIVE_FOLDER_ID because parent_Id not empty"""
         body["parents"] = [parent_Id]
     media_body = MediaFileUpload(file_path, mimetype=mimeType, resumable=True)
-    """ - Start upload process - """
+    """Start upload process"""
     file = service.files().create(
         body=body,
         media_body=media_body,
@@ -669,7 +669,7 @@ async def upload(gdrive, service, file_path, file_name, mimeType):
     file_id = response.get("id")
     file_size = response.get("size")
     downloadURL = response.get("webContentLink")
-    """ - Change permission - """
+    """Change permission"""
     await change_permission(service, file_id)
     return int(file_size), downloadURL
 
@@ -814,17 +814,17 @@ async def lists(gdrive):
 
 @register(pattern=r"^\.gdf (mkdir|rm|chck) (.*)", outgoing=True)
 async def google_drive_managers(gdrive):
-    """ - Google Drive folder/file management - """
+    """Google Drive folder/file management"""
     await gdrive.edit("`Sending information...`")
     service = await create_app(gdrive)
     if service is False:
         return None
-    """ - Split name if contains spaces by using ; - """
+    """Split name if contains spaces by using ;"""
     f_name = gdrive.pattern_match.group(2).split(";")
     exe = gdrive.pattern_match.group(1)
     reply = ""
     for name_or_id in f_name:
-        """ - in case given name has a space beetween ; - """
+        """in case given name has a space beetween ;"""
         name_or_id = name_or_id.strip()
         metadata = {
             "name": name_or_id,
@@ -834,11 +834,11 @@ async def google_drive_managers(gdrive):
             if parent_Id is not None:
                 pass
         except NameError:
-            """ - Fallback to G_DRIVE_FOLDER_ID else to root dir - """
+            """Fallback to G_DRIVE_FOLDER_ID else to root dir"""
             if G_DRIVE_FOLDER_ID is not None:
                 metadata["parents"] = [G_DRIVE_FOLDER_ID]
         else:
-            """ - Override G_DRIVE_FOLDER_ID because parent_Id not empty - """
+            """Override G_DRIVE_FOLDER_ID because parent_Id not empty"""
             metadata["parents"] = [parent_Id]
         page_token = None
         result = (
@@ -856,9 +856,7 @@ async def google_drive_managers(gdrive):
             .execute()
         )
         if exe == "mkdir":
-            """
-            - Create a directory, abort if exist when parent not given -
-            """
+            """Create a directory, abort if exist when parent not given"""
             status = "[FOLDER - EXIST]"
             try:
                 folder = result.get("files", [])[0]
@@ -868,7 +866,7 @@ async def google_drive_managers(gdrive):
             folder_id = folder.get("id")
             webViewURL = folder.get("webViewLink")
             if "CREATED" in status:
-                """ - Change permission - """
+                """Change permission"""
                 await change_permission(service, folder_id)
             reply += (
                 f"`{status}`\n\n"
@@ -877,13 +875,13 @@ async def google_drive_managers(gdrive):
                 f"`URL :` [Open]({webViewURL})\n\n"
             )
         elif exe == "rm":
-            """ - Permanently delete, skipping the trash - """
+            """Permanently delete, skipping the trash"""
             try:
-                """ - Try if given value is a name not a folderId/fileId - """
+                """Try if given value is a name not a folderId/fileId"""
                 f = result.get("files", [])[0]
                 f_id = f.get("id")
             except IndexError:
-                """ - If failed assumming value is folderId/fileId - """
+                """If failed assumming value is folderId/fileId"""
                 f_id = name_or_id
                 try:
                     f = await get_information(service, f_id)
@@ -911,11 +909,11 @@ async def google_drive_managers(gdrive):
             else:
                 reply += f"`{status}`\n\n" f"`{name}`\n" "`Status` : **OK**\n\n"
         elif exe == "chck":
-            """ - Check file/folder if exists - """
+            """Check file/folder if exists"""
             try:
                 f = result.get("files", [])[0]
             except IndexError:
-                """ - If failed assumming value is folderId/fileId - """
+                """If failed assumming value is folderId/fileId"""
                 f_id = name_or_id
                 try:
                     f = await get_information(service, f_id)
@@ -926,7 +924,7 @@ async def google_drive_managers(gdrive):
                         f"`Reason` : `{str(e)}`\n\n"
                     )
                     continue
-            """ - If exists parse file/folder information - """
+            """If exists parse file/folder information"""
             name_or_id = f.get("name")  # override input value
             f_id = f.get("id")
             f_size = f.get("size")
@@ -957,9 +955,7 @@ async def google_drive_managers(gdrive):
 
 @register(pattern=r"^\.gdabort(?: |$)", outgoing=True)
 async def cancel_process(gdrive):
-    """
-       Abort process for download and upload
-    """
+    """Abort process for download and upload."""
     global is_cancelled
     downloads = aria2.get_downloads()
     await gdrive.edit("`Cancelling...`")
@@ -974,7 +970,7 @@ async def cancel_process(gdrive):
 @register(pattern=r"^\.gd(?: |$)(.*)", outgoing=True)
 async def google_drive(gdrive):
     reply = ""
-    """ - Parsing all google drive function - """
+    """Parsing all google drive function"""
     value = gdrive.pattern_match.group(1)
     file_path = None
     uri = None
@@ -1036,7 +1032,7 @@ async def google_drive(gdrive):
         return None
     else:
         if re.findall(r"\bhttps?://drive\.google\.com\S+", value):
-            """ - Link is google drive fallback to download - """
+            """Link is google drive fallback to download"""
             value = re.findall(r"\bhttps?://drive\.google\.com\S+", value)
             for uri in value:
                 try:
@@ -1111,7 +1107,7 @@ async def google_drive(gdrive):
                     await asyncio.sleep(2.5)
                     break
                 else:
-                    """ - if something bad happened, continue to next uri - """
+                    """if something bad happened, continue to next uri"""
                     reply += (
                         "`[UNKNOWN - ERROR]`\n\n"
                         "`Status` : **BAD**\n"
@@ -1143,7 +1139,7 @@ async def google_drive(gdrive):
 
 @register(pattern=r"^\.gdfset (put|rm)(?: |$)(.*)", outgoing=True)
 async def set_upload_folder(gdrive):
-    """ - Set parents dir for upload/check/makedir/remove - """
+    """Set parents dir for upload/check/makedir/remove."""
     await gdrive.edit("`Sending information...`")
     global parent_Id
     exe = gdrive.pattern_match.group(1)
@@ -1174,11 +1170,11 @@ async def set_upload_folder(gdrive):
     if not inp:
         await gdrive.edit(">`.gdfset put <folderURL/folderID>`")
         return None
-    """ - Value for .gdfset (put|rm) can be folderId or folder link - """
+    """Value for .gdfset (put|rm) can be folderId or folder link"""
     try:
         ext_id = re.findall(r"\bhttps?://drive\.google\.com\S+", inp)[0]
     except IndexError:
-        """ - if given value isn't folderURL assume it's an Id - """
+        """if given value isn't folderURL assume it's an Id"""
         c1 = True if any(map(str.isdigit, inp)) else False
         c2 = True if "-" in inp or "_" in inp else False
         if True in [c1 or c2]:
@@ -1201,7 +1197,7 @@ async def set_upload_folder(gdrive):
         try:
             parent_Id = ext_id.split("folders/")[1]
         except IndexError:
-            """ - Try catch again if URL open?id= - """
+            """Try catch again if URL open?id="""
             try:
                 parent_Id = ext_id.split("open?id=")[1]
             except IndexError:

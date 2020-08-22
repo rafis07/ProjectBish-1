@@ -4,9 +4,7 @@
 # you may not use this file except in compliance with the License.
 # credits to @AvinashReddy3108
 #
-"""
-This module updates the userbot based on upstream revision
-"""
+"""This module updates the userbot based on upstream revision"""
 
 from os import remove, execle, path, environ
 import asyncio
@@ -188,7 +186,7 @@ async def upstream(event):
     ups_rem.fetch(ac_br)
 
     changelog = await gen_chlog(repo, f'HEAD..upstream/{ac_br}')
-    """ - Special case for deploy - """
+    """Special case for deploy"""
     if conf == "deploy":
         await event.edit('`Deploying userbot, please wait....`')
         await deploy(event, repo, ups_rem, ac_br, txt)

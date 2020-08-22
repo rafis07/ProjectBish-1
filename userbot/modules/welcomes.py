@@ -12,10 +12,6 @@ async def welcome_to_chat(event):
         return
     cws = get_current_welcome_settings(event.chat_id)
     if cws:
-        """user_added=True,
-        user_joined=True,
-        user_left=False,
-        user_kicked=False"""
         if (event.user_joined
                 or event.user_added) and not (await event.get_user()).bot:
             if CLEAN_WELCOME:

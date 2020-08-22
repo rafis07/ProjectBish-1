@@ -3,8 +3,7 @@
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module containing commands related to the \
-    Information Superhighway (yes, Internet). """
+"""Userbot module containing commands related to the. Information Superhighway (yes, Internet)."""
 
 from datetime import datetime
 import wget
@@ -17,7 +16,7 @@ from userbot.events import register
 
 @register(outgoing=True, pattern=r"^\.speed$")
 async def speedtst(spd):
-    """ For .speed command, use SpeedTest to check server speeds. """
+    """For .speed command, use SpeedTest to check server speeds."""
     await spd.edit("`Running speed test . . .`")
     test = Speedtest()
 
@@ -61,7 +60,7 @@ def humanbytes(size: float) -> str:
 
 @register(outgoing=True, pattern=r"^\.dc$")
 async def neardc(event):
-    """ For .dc command, get the nearest datacenter information. """
+    """For .dc command, get the nearest datacenter information."""
     result = await event.client(functions.help.GetNearestDcRequest())
     await event.edit(f"Country : `{result.country}`\n"
                      f"Nearest Datacenter : `{result.nearest_dc}`\n"
@@ -70,7 +69,7 @@ async def neardc(event):
 
 @register(outgoing=True, pattern=r"^\.ping$")
 async def pingme(pong):
-    """ For .ping command, ping the userbot from any chat.  """
+    """For .ping command, ping the userbot from any chat."""
     start = datetime.now()
     await pong.edit("`Pong!`")
     end = datetime.now()

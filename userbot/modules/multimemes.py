@@ -222,7 +222,7 @@ async def hazz(hazmat):
                 response = await conv.get_response()
             else:
                 response = await conv.get_response()
-            """ - don't spam notif - """
+            """don't spam notif"""
             await bot.send_read_acknowledge(conv.chat_id)
         except YouBlockedUserError:
             await hazmat.reply("`Please unblock` @hazmat_suit_bot`...`")
@@ -244,7 +244,7 @@ async def hazz(hazmat):
                 force_document=False,
                 reply_to=message_id_to_reply
             )
-            """ - cleanup chat after completed - """
+            """cleanup chat after completed"""
             if msg_reply is not None:
                 await hazmat.client.delete_messages(
                     conv.chat_id,
@@ -283,7 +283,7 @@ async def _(fry):
                     msg_level = await conv.send_message(m, reply_to=msg.id)
                     r = await conv.get_response()
                 response = await conv.get_response()
-                """ - don't spam notif - """
+                """don't spam notif"""
                 await bot.send_read_acknowledge(conv.chat_id)
             except YouBlockedUserError:
                 await fry.reply("`Please unblock` @image_deepfrybot`...`")
@@ -297,7 +297,7 @@ async def _(fry):
                                            downloaded_file_name,
                                            force_document=False,
                                            reply_to=message_id_to_reply)
-                """ - cleanup chat after completed - """
+                """cleanup chat after completed"""
                 try:
                     msg_level
                 except NameError:

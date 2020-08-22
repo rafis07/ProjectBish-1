@@ -4,7 +4,7 @@
 
 ###### Searching and Downloading Google Images to the local disk ######
 
-""" Source: https://github.com/Joeclinton1/google-images-download """
+"""Source: https://github.com/Joeclinton1/google-images-download"""
 
 # Import Libraries
 import codecs
