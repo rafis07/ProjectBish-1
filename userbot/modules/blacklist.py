@@ -8,8 +8,9 @@
 
 import io
 import re
-import userbot.modules.sql_helper.blacklist_sql as sql
 from asyncio import sleep
+
+import userbot.modules.sql_helper.blacklist_sql as sql
 from userbot import CMD_HELP
 from userbot.events import register
 
@@ -35,11 +36,14 @@ async def on_new_message(event):
 @register(outgoing=True, pattern=r"^\.addbl(?: |$)(.*)")
 async def on_add_black_list(addbl):
     text = addbl.pattern_match.group(1)
-    to_blacklist = list(set(trigger.strip()
-                            for trigger in text.split("\n") if trigger.strip()))
+    to_blacklist = list(
+        set(trigger.strip() for trigger in text.split("\n") if trigger.strip())
+    )
     for trigger in to_blacklist:
         sql.add_to_blacklist(addbl.chat_id, trigger.lower())
-    await addbl.edit("`Added` **{}** `to the blacklist in the current chat`".format(text))
+    await addbl.edit(
+        "`Added` **{}** `to the blacklist in the current chat`".format(text)
+    )
 
 
 @register(outgoing=True, pattern=r"^\.listbl(?: |$)(.*)")
@@ -60,7 +64,7 @@ async def on_view_blacklist(listbl):
                 force_document=True,
                 allow_cache=False,
                 caption="BlackLists in the Current Chat",
-                reply_to=listbl
+                reply_to=listbl,
             )
             await listbl.delete()
     else:
@@ -70,8 +74,9 @@ async def on_view_blacklist(listbl):
 @register(outgoing=True, pattern=r"^\.rmbl(?: |$)(.*)")
 async def on_delete_blacklist(rmbl):
     text = rmbl.pattern_match.group(1)
-    to_unblacklist = list(set(trigger.strip()
-                              for trigger in text.split("\n") if trigger.strip()))
+    to_unblacklist = list(
+        set(trigger.strip() for trigger in text.split("\n") if trigger.strip())
+    )
     successful = 0
     for trigger in to_unblacklist:
         if sql.rm_from_blacklist(rmbl.chat_id, trigger.lower()):
@@ -81,10 +86,15 @@ async def on_delete_blacklist(rmbl):
     else:
         await rmbl.edit("`Blacklist` **{}** `was deleted successfully`".format(text))
 
-CMD_HELP.update({"blacklist": ">`.listbl`"
-                 "\nUsage: Lists all active userbot blacklist in a chat."
-                 "\n\n>`.addbl` <keyword>"
-                 "\nUsage: Saves the message to the 'blacklist keyword'."
-                 "\nThe bot will delete to the message whenever 'blacklist keyword' is mentioned."
-                 "\n\n>`.rmbl` <keyword>"
-                 "\nUsage: Stops the specified blacklist."})
+
+CMD_HELP.update(
+    {
+        "blacklist": ">`.listbl`"
+        "\nUsage: Lists all active userbot blacklist in a chat."
+        "\n\n>`.addbl` <keyword>"
+        "\nUsage: Saves the message to the 'blacklist keyword'."
+        "\nThe bot will delete to the message whenever 'blacklist keyword' is mentioned."
+        "\n\n>`.rmbl` <keyword>"
+        "\nUsage: Stops the specified blacklist."
+    }
+)

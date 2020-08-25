@@ -29,11 +29,13 @@ async def help(event):
         for i in sorted(CMD_HELP):
             string += "`" + str(i)
             string += "`  |  "
-        await event.edit(f"{head}\
+        await event.edit(
+            f"{head}\
               \n{sep2}\
               \n{head2}\
               \n{head3}\
               \n{sep2}\
               \n{head4}\
               \n\n{string}\
-              \n{sep1}")
+              \n{sep1}"
+        )

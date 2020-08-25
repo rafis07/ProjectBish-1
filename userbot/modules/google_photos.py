@@ -23,8 +23,8 @@ from userbot.events import register
 from userbot.utils import progress
 
 logging.basicConfig(
-    format="[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s",
-    level=logging.WARNING)
+    format="[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s", level=logging.WARNING
+)
 logger = logging.getLogger(__name__)
 
 
@@ -172,7 +172,8 @@ async def upload_google_photos(event):
         }
         # Step 1: Initiating an upload session
         step_one_response = await session.post(
-            f"{PHOTOS_BASE_URI}/v1/uploads", headers=headers,
+            f"{PHOTOS_BASE_URI}/v1/uploads",
+            headers=headers,
         )
 
         if step_one_response.status != 200:
@@ -253,7 +254,9 @@ async def upload_google_photos(event):
             .get("mediaItem")
             .get("productUrl")
         )
-        await event.edit(f"`[SUCCESS]`\n\nUploaded to Google Photo [View Photo]({photo_url})")
+        await event.edit(
+            f"`[SUCCESS]`\n\nUploaded to Google Photo [View Photo]({photo_url})"
+        )
     except Exception as e:
         await event.edit(str(e))
 

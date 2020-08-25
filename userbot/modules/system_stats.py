@@ -12,11 +12,12 @@ from datetime import datetime
 from os import remove
 from platform import python_version, uname
 from shutil import which
-import psutil
-from telethon import __version__, version
-from git import Repo
 
-from userbot import bot, CMD_HELP, ALIVE_NAME, ALIVE_LOGO
+import psutil
+from git import Repo
+from telethon import __version__, version
+
+from userbot import ALIVE_LOGO, ALIVE_NAME, CMD_HELP, bot
 from userbot.events import register
 
 # ================= CONSTANT =================
@@ -40,10 +41,8 @@ async def psu(event):
     softw += f"`Boot Time: {bt.day}/{bt.month}/{bt.year}  {bt.hour}:{bt.minute}:{bt.second}`\n"
     # CPU Cores
     cpuu = "**CPU Info**\n"
-    cpuu += "`Physical cores   : " + \
-        str(psutil.cpu_count(logical=False)) + "`\n"
-    cpuu += "`Total cores      : " + \
-        str(psutil.cpu_count(logical=True)) + "`\n"
+    cpuu += "`Physical cores   : " + str(psutil.cpu_count(logical=False)) + "`\n"
+    cpuu += "`Total cores      : " + str(psutil.cpu_count(logical=True)) + "`\n"
     # CPU frequencies
     cpufreq = psutil.cpu_freq()
     cpuu += f"`Max Frequency    : {cpufreq.max:.2f}Mhz`\n"
@@ -97,8 +96,7 @@ async def sysdetails(sysd):
             )
 
             stdout, stderr = await fetch.communicate()
-            result = str(stdout.decode().strip()) \
-                + str(stderr.decode().strip())
+            result = str(stdout.decode().strip()) + str(stderr.decode().strip())
 
             await sysd.edit("`" + result + "`")
         except FileNotFoundError:
@@ -108,8 +106,7 @@ async def sysdetails(sysd):
 @register(outgoing=True, pattern=r"^\.botver$")
 async def bot_ver(event):
     """For .botver command, get the bot version."""
-    if not event.text[0].isalpha() and event.text[0] not in ("/", "#", "@",
-                                                             "!"):
+    if not event.text[0].isalpha() and event.text[0] not in ("/", "#", "@", "!"):
         if which("git") is not None:
             ver = await asyncrunapp(
                 "git",
@@ -120,8 +117,7 @@ async def bot_ver(event):
                 stderr=asyncPIPE,
             )
             stdout, stderr = await ver.communicate()
-            verout = str(stdout.decode().strip()) \
-                + str(stderr.decode().strip())
+            verout = str(stdout.decode().strip()) + str(stderr.decode().strip())
 
             rev = await asyncrunapp(
                 "git",
@@ -132,8 +128,7 @@ async def bot_ver(event):
                 stderr=asyncPIPE,
             )
             stdout, stderr = await rev.communicate()
-            revout = str(stdout.decode().strip()) \
-                + str(stderr.decode().strip())
+            revout = str(stdout.decode().strip()) + str(stderr.decode().strip())
 
             com = await asyncrunapp(
                 "git",
@@ -144,12 +139,13 @@ async def bot_ver(event):
                 stderr=asyncPIPE,
             )
             stdout, stderr = await com.communicate()
-            comout = str(stdout.decode().strip()) \
-                + str(stderr.decode().strip())
+            comout = str(stdout.decode().strip()) + str(stderr.decode().strip())
 
-        await event.edit(f"`Userbot Version: {verout}`\n"
-                         f"`Revision: {revout}`\n"
-                         f"`Latest commit: {comout}`")
+        await event.edit(
+            f"`Userbot Version: {verout}`\n"
+            f"`Revision: {revout}`\n"
+            f"`Latest commit: {comout}`"
+        )
     else:
         await event.edit(
             "Shame that you don't have git, You're running `v1.beta.5` anyway"
@@ -173,8 +169,7 @@ async def pipcheck(pip):
         )
 
         stdout, stderr = await pipc.communicate()
-        pipout = str(stdout.decode().strip()) \
-            + str(stderr.decode().strip())
+        pipout = str(stdout.decode().strip()) + str(stderr.decode().strip())
 
         if pipout:
             if len(pipout) > 4096:
@@ -188,11 +183,13 @@ async def pipcheck(pip):
                 )
                 remove("output.txt")
                 return
-            await pip.edit("**Query: **\n`"
-                           f"pip3 search {pipmodule}"
-                           "`\n**Result: **\n`"
-                           f"{pipout}"
-                           "`")
+            await pip.edit(
+                "**Query: **\n`"
+                f"pip3 search {pipmodule}"
+                "`\n**Result: **\n`"
+                f"{pipout}"
+                "`"
+            )
         else:
             await pip.edit("`Use .help pip to see an example`")
 
@@ -201,21 +198,25 @@ async def pipcheck(pip):
 async def amireallyalive(alive):
     """For .alive command, check if the bot is running."""
     logo = ALIVE_LOGO
-    output = (f"`ProjectBish` is running on `{repo.active_branch.name}`\n"
-              "`====================================`\n"
-              f"🐍 `Python         :` v{python_version()}\n"
-              f"⚙️ `Telethon       :` v{version.__version__}\n"
-              f"🧩 `Loaded modules :` {len(modules)}\n"
-              f"👤 `User           :` {DEFAULTUSER}\n"
-              "`====================================`\n")
+    output = (
+        f"`ProjectBish` is running on `{repo.active_branch.name}`\n"
+        "`====================================`\n"
+        f"🐍 `Python         :` v{python_version()}\n"
+        f"⚙️ `Telethon       :` v{version.__version__}\n"
+        f"🧩 `Loaded modules :` {len(modules)}\n"
+        f"👤 `User           :` {DEFAULTUSER}\n"
+        "`====================================`\n"
+    )
     if ALIVE_LOGO:
         try:
             logo = ALIVE_LOGO
             await bot.send_file(alive.chat_id, logo, caption=output)
             await alive.delete()
         except BaseException:
-            await alive.edit(output + "\n\n *`The provided logo is invalid."
-                             "\nMake sure the link is directed to the logo picture`")
+            await alive.edit(
+                output + "\n\n *`The provided logo is invalid."
+                "\nMake sure the link is directed to the logo picture`"
+            )
     else:
         await alive.edit(output)
 
@@ -224,12 +225,12 @@ async def amireallyalive(alive):
 async def amireallyaliveuser(username):
     """For .aliveu command, change the username in the .alive command."""
     message = username.text
-    output = '.aliveu [new user without brackets] nor can it be empty'
-    if not (message == '.aliveu' or message[7:8] != ' '):
+    output = ".aliveu [new user without brackets] nor can it be empty"
+    if not (message == ".aliveu" or message[7:8] != " "):
         newuser = message[8:]
         global DEFAULTUSER
         DEFAULTUSER = newuser
-        output = 'Successfully changed user to ' + newuser + '!'
+        output = "Successfully changed user to " + newuser + "!"
     await username.edit("`" f"{output}" "`")
 
 
@@ -241,23 +242,19 @@ async def amireallyalivereset(ureset):
     await ureset.edit("`" "Successfully reset user for alive!" "`")
 
 
-CMD_HELP.update({
-    "sysd":
-    ">`.sysd`"
-    "\nUsage: Shows system information using neofetch."
-    "\n\n>`.spc`"
-    "\nUsage: Show system specification.",
-    "botver":
-    ">`.botver`"
-    "\nUsage: Shows the userbot version.",
-    "pip":
-    ">`.pip <module(s)>`"
-    "\nUsage: Does a search of pip modules(s).",
-    "alive":
-    ">`.alive`"
-    "\nUsage: Type .alive to see wether your bot is working or not."
-    "\n\n>`.aliveu <text>`"
-    "\nUsage: Changes the 'user' in alive to the text you want."
-    "\n\n>`.resetalive`"
-    "\nUsage: Resets the user to default."
-})
+CMD_HELP.update(
+    {
+        "sysd": ">`.sysd`"
+        "\nUsage: Shows system information using neofetch."
+        "\n\n>`.spc`"
+        "\nUsage: Show system specification.",
+        "botver": ">`.botver`" "\nUsage: Shows the userbot version.",
+        "pip": ">`.pip <module(s)>`" "\nUsage: Does a search of pip modules(s).",
+        "alive": ">`.alive`"
+        "\nUsage: Type .alive to see wether your bot is working or not."
+        "\n\n>`.aliveu <text>`"
+        "\nUsage: Changes the 'user' in alive to the text you want."
+        "\n\n>`.resetalive`"
+        "\nUsage: Resets the user to default.",
+    }
+)

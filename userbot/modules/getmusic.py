@@ -21,7 +21,6 @@ from userbot import CMD_HELP, LASTFM_USERNAME, bot, lastfm
 from userbot.events import register
 from userbot.utils import progress
 
-
 # For song module
 
 
@@ -33,9 +32,8 @@ def getmusic(get, DEFAULT_AUDIO_QUALITY):
     }
 
     html = requests.get(
-        "https://www.youtube.com/results?search_query=" +
-        search,
-        headers=headers).text
+        "https://www.youtube.com/results?search_query=" + search, headers=headers
+    ).text
     soup = BeautifulSoup(html, "html.parser")
     for link in soup.find_all("a"):
         if "/watch?v=" in link.get("href"):
@@ -45,10 +43,11 @@ def getmusic(get, DEFAULT_AUDIO_QUALITY):
 
     video_link = "http://www.youtube.com/" + video_link
     command = (
-        "youtube-dl --write-thumbnail --extract-audio --audio-format mp3 --audio-quality " +
-        DEFAULT_AUDIO_QUALITY +
-        " " +
-        video_link)
+        "youtube-dl --write-thumbnail --extract-audio --audio-format mp3 --audio-quality "
+        + DEFAULT_AUDIO_QUALITY
+        + " "
+        + video_link
+    )
     os.system(command)
 
 
@@ -59,9 +58,8 @@ def getmusicvideo(cat):
         "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     }
     html = requests.get(
-        "https://www.youtube.com/results?search_query=" +
-        search,
-        headers=headers).text
+        "https://www.youtube.com/results?search_query=" + search, headers=headers
+    ).text
     soup = BeautifulSoup(html, "html.parser")
     for link in soup.find_all("a"):
         if "/watch?v=" in link.get("href"):
@@ -321,4 +319,6 @@ CMD_HELP.update(
         "\nUsage: Download music from Spotify or Deezer use `@MusicHuntersBot`.\n\n"
         ">`.deez` <spotify/deezer link> FORMAT\n"
         "Usage: Download music from deezer or spotify.\n"
-        "**Format** `FLAC`, `MP3_320`, `MP3_256`, `MP3_128`."})
+        "**Format** `FLAC`, `MP3_320`, `MP3_256`, `MP3_128`."
+    }
+)

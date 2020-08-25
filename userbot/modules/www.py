@@ -5,11 +5,13 @@
 #
 """Userbot module containing commands related to the. Information Superhighway (yes, Internet)."""
 
-from datetime import datetime
-import wget
 import os
+from datetime import datetime
+
+import wget
 from speedtest import Speedtest
 from telethon import functions
+
 from userbot import CMD_HELP
 from userbot.events import register
 
@@ -62,9 +64,11 @@ def humanbytes(size: float) -> str:
 async def neardc(event):
     """For .dc command, get the nearest datacenter information."""
     result = await event.client(functions.help.GetNearestDcRequest())
-    await event.edit(f"Country : `{result.country}`\n"
-                     f"Nearest Datacenter : `{result.nearest_dc}`\n"
-                     f"This Datacenter : `{result.this_dc}`")
+    await event.edit(
+        f"Country : `{result.country}`\n"
+        f"Nearest Datacenter : `{result.nearest_dc}`\n"
+        f"This Datacenter : `{result.this_dc}`"
+    )
 
 
 @register(outgoing=True, pattern=r"^\.ping$")
@@ -77,14 +81,10 @@ async def pingme(pong):
     await pong.edit("`Pong!\n%sms`" % (duration))
 
 
-CMD_HELP.update({
-    "speed":
-    ">`.speed`"
-    "\nUsage: Does a speedtest and shows the results.",
-    "dc":
-    ">`.dc`"
-    "\nUsage: Finds the nearest datacenter from your server.",
-    "ping":
-    ">`.ping`"
-    "\nUsage: Shows how long it takes to ping your bot."
-})
+CMD_HELP.update(
+    {
+        "speed": ">`.speed`" "\nUsage: Does a speedtest and shows the results.",
+        "dc": ">`.dc`" "\nUsage: Finds the nearest datacenter from your server.",
+        "ping": ">`.ping`" "\nUsage: Shows how long it takes to ping your bot.",
+    }
+)
