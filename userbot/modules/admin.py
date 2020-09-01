@@ -12,6 +12,7 @@ from telethon.errors import (
     ChatAdminRequiredError,
     ImageProcessFailedError,
     PhotoCropSizeSmallError,
+    RightForbiddenError,
     UserAdminInvalidError,
 )
 from telethon.errors.rpcerrorlist import MessageTooLongError, UserIdInvalidError
@@ -149,6 +150,8 @@ async def promote(promt):
     try:
         await promt.client(EditAdminRequest(promt.chat_id, user.id, new_rights, rank))
         await promt.edit("`Promoted Successfully!`")
+    except RightForbiddenError:
+        return await promt.edit(NO_PERM)
 
     # If Telethon spit BadRequestError, assume
     # we don't have Promote permission
