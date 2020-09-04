@@ -11,11 +11,13 @@ import asyncio
 import os
 import random
 import re
+import textwrap
 from asyncio.exceptions import TimeoutError
 
+from PIL import Image, ImageDraw, ImageFont
 from telethon import events
 from telethon.errors.rpcerrorlist import YouBlockedUserError
-from telethon.tl.types import MessageMediaPhoto
+from telethon.tl.types import DocumentAttributeFilename
 
 from userbot import CMD_HELP, TEMP_DOWNLOAD_DIRECTORY, bot
 from userbot.events import register
@@ -39,8 +41,6 @@ EMOJI_PATTERN = re.compile(
 
 @register(outgoing=True, pattern=r"^\.mmf(?: |$)(.*)")
 async def mim(event):
-    if event.fwd_from:
-        return
     if not event.reply_to_msg_id:
         await event.edit(
             "`Syntax: reply to an image with .mms` 'text on top' ; 'text on bottom' "
@@ -50,103 +50,142 @@ async def mim(event):
     if not reply_message.media:
         await event.edit("`Reply to a image/sticker/gif.`")
         return
-    reply_message.sender
     await bot.download_file(reply_message.media)
-    if reply_message.sender.bot:
-        await event.edit("`Reply to actual users message.`")
-        return
-    else:
-        await event.edit("`Processing...`")
+    if event.is_reply:
+        data = await check_media(reply_message)
+        if isinstance(data, bool):
+            await event.edit("`Unsupported Files...`")
+            return
+
+        await event.edit(
+            "```Transfiguration Time! Mwahaha Memifying this image! (」ﾟﾛﾟ)｣ ```"
+        )
         await asyncio.sleep(5)
-    try:
-        async with bot.conversation("@MemeAutobot") as bot_conv:
-            chat = "@MemeAutobot"
-            try:
-                memeVar = event.pattern_match.group(1)
-                await silently_send_message(bot_conv, "/start")
-                await asyncio.sleep(1)
-                await silently_send_message(bot_conv, memeVar)
-                await bot.send_file(chat, reply_message.media)
-                response = await bot_conv.get_response()
-            except YouBlockedUserError:
-                await event.reply("`Please unblock @MemeAutobot and try again.`")
-                return
-            if response.text.startswith("Forward"):
-                await event.edit(
-                    "`Add `@MemeAutobot` to your forward privacy settings.`"
-                )
-            if "Okay..." in response.text:
-                await event.edit("`Converting...`")
-                thumb = None
-                if os.path.exists(THUMB_IMAGE_PATH):
-                    thumb = THUMB_IMAGE_PATH
-                input_str = event.pattern_match.group(1)
-                if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
-                    os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
-                if event.reply_to_msg_id:
-                    file_name = "meme.png"
-                    reply_message = await event.get_reply_message()
-                    to_download_directory = TEMP_DOWNLOAD_DIRECTORY
-                    downloaded_file_name = os.path.join(
-                        to_download_directory, file_name
-                    )
-                    downloaded_file_name = await bot.download_media(
-                        reply_message,
-                        downloaded_file_name,
-                    )
-                    if os.path.exists(downloaded_file_name):
-                        await bot.send_file(
-                            chat,
-                            downloaded_file_name,
-                            force_document=False,
-                            supports_streaming=False,
-                            allow_cache=False,
-                            thumb=thumb,
-                        )
-                        os.remove(downloaded_file_name)
-                    else:
-                        await event.edit("File Not Found {}".format(input_str))
-                response = await bot_conv.get_response()
-                the_download_directory = TEMP_DOWNLOAD_DIRECTORY
-                files_name = "memes.webp"
-                download_file_name = os.path.join(the_download_directory, files_name)
-                await bot.download_media(
-                    response.media,
-                    download_file_name,
-                )
-                requires_file_name = TEMP_DOWNLOAD_DIRECTORY + "memes.webp"
-                await bot.send_file(  # pylint:disable=E0602
-                    event.chat_id,
-                    requires_file_name,
-                    supports_streaming=False,
-                    caption="Memifyed",
-                )
-                await event.delete()
-            elif not is_message_image(reply_message):
-                await event.edit("`Invalid message type.`")
-                return
-            else:
-                await bot.send_file(event.chat_id, response.media)
-    except TimeoutError:
-        return await event.edit("**Error:** @MemeAutobot **is not responding.**")
+        text = event.pattern_match.group(1)
+        if event.reply_to_msg_id:
+            file_name = "meme.jpg"
+            to_download_directory = TEMP_DOWNLOAD_DIRECTORY
+            downloaded_file_name = os.path.join(to_download_directory, file_name)
+            downloaded_file_name = await bot.download_media(
+                reply_message,
+                downloaded_file_name,
+            )
+            dls_loc = downloaded_file_name
+        webp_file = await draw_meme_text(dls_loc, text)
+        await event.client.send_file(
+            event.chat_id, webp_file, reply_to=event.reply_to_msg_id
+        )
+        await event.delete()
+        os.remove(webp_file)
+        os.remove(dls_loc)
 
 
-def is_message_image(message):
-    if message.media:
-        if isinstance(message.media, MessageMediaPhoto):
-            return True
-        if message.media.document:
-            if message.media.document.mime_type.split("/")[0] == "image":
-                return True
-        return False
-    return False
+async def draw_meme_text(image_path, text):
+    img = Image.open(image_path)
+    os.remove(image_path)
+    i_width, i_height = img.size
+    m_font = ImageFont.truetype(
+        "resources/MutantAcademyStyle.ttf", int((70 / 640) * i_width)
+    )
+    if ";" in text:
+        upper_text, lower_text = text.split(";")
+    else:
+        upper_text = text
+        lower_text = ""
+    draw = ImageDraw.Draw(img)
+    current_h, pad = 10, 5
+    if upper_text:
+        for u_text in textwrap.wrap(upper_text, width=15):
+            u_width, u_height = draw.textsize(u_text, font=m_font)
 
+            draw.text(
+                xy=(((i_width - u_width) / 2) - 1, int((current_h / 640) * i_width)),
+                text=u_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=(((i_width - u_width) / 2) + 1, int((current_h / 640) * i_width)),
+                text=u_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=((i_width - u_width) / 2, int(((current_h / 640) * i_width)) - 1),
+                text=u_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=(((i_width - u_width) / 2), int(((current_h / 640) * i_width)) + 1),
+                text=u_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
 
-async def silently_send_message(conv, text):
-    await conv.send_message(text)
-    response = await conv.get_response()
-    await conv.mark_read(message=response)
-    return response
+            draw.text(
+                xy=((i_width - u_width) / 2, int((current_h / 640) * i_width)),
+                text=u_text,
+                font=m_font,
+                fill=(255, 255, 255),
+            )
+            current_h += u_height + pad
+    if lower_text:
+        for l_text in textwrap.wrap(lower_text, width=15):
+            u_width, u_height = draw.textsize(l_text, font=m_font)
+
+            draw.text(
+                xy=(
+                    ((i_width - u_width) / 2) - 1,
+                    i_height - u_height - int((20 / 640) * i_width),
+                ),
+                text=l_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=(
+                    ((i_width - u_width) / 2) + 1,
+                    i_height - u_height - int((20 / 640) * i_width),
+                ),
+                text=l_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=(
+                    (i_width - u_width) / 2,
+                    (i_height - u_height - int((20 / 640) * i_width)) - 1,
+                ),
+                text=l_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+            draw.text(
+                xy=(
+                    (i_width - u_width) / 2,
+                    (i_height - u_height - int((20 / 640) * i_width)) + 1,
+                ),
+                text=l_text,
+                font=m_font,
+                fill=(0, 0, 0),
+            )
+
+            draw.text(
+                xy=(
+                    (i_width - u_width) / 2,
+                    i_height - u_height - int((20 / 640) * i_width),
+                ),
+                text=l_text,
+                font=m_font,
+                fill=(255, 255, 255),
+            )
+            current_h += u_height + pad
+
+    image_name = "memify.webp"
+    webp_file = os.path.join(TEMP_DOWNLOAD_DIRECTORY, image_name)
+    img.save(webp_file, "WebP")
+    return webp_file
 
 
 @register(outgoing=True, pattern=r"^\.q")
@@ -387,6 +426,35 @@ async def waifu(animu):
 
 def deEmojify(inputString: str) -> str:
     return re.sub(EMOJI_PATTERN, "", inputString)
+
+
+async def check_media(reply_message):
+    if reply_message and reply_message.media:
+        if reply_message.photo:
+            data = reply_message.photo
+        elif reply_message.document:
+            if (
+                DocumentAttributeFilename(file_name="AnimatedSticker.tgs")
+                in reply_message.media.document.attributes
+            ):
+                return False
+            if (
+                reply_message.gif
+                or reply_message.video
+                or reply_message.audio
+                or reply_message.voice
+            ):
+                return False
+            data = reply_message.media.document
+        else:
+            return False
+    else:
+        return False
+
+    if not data or data is None:
+        return False
+    else:
+        return data
 
 
 CMD_HELP.update(
