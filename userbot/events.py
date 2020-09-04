@@ -5,6 +5,7 @@
 #
 """Userbot module for managing events. One of the main components of the userbot."""
 
+import codecs
 import sys
 from asyncio import create_subprocess_shell as asyncsubshell
 from asyncio import subprocess as asyncsub
@@ -12,6 +13,7 @@ from os import remove
 from time import gmtime, strftime
 from traceback import format_exc
 
+import requests
 from telethon import events
 
 from userbot import bot, BOTLOG_CHATID, LOGSPAMMER
@@ -117,13 +119,13 @@ def register(**args):
                     ftext += str(check.text)
                     ftext += "\n\nTraceback info:\n"
                     ftext += str(format_exc())
-                    ftext += "\n\nError text:\n"
+                    ftext += "Error text:\n"
                     ftext += str(sys.exc_info()[1])
                     ftext += "\n\n--------END USERBOT TRACEBACK LOG--------"
 
                     command = "git log --pretty=format:\"%an: %s\" -10"
 
-                    ftext += "\n\n\nLast 10 commits:\n"
+                    ftext += "\n\nLast 10 commits:\n"
 
                     process = await asyncsubshell(command,
                                                   stdout=asyncsub.PIPE,
@@ -138,15 +140,25 @@ def register(**args):
                         file.write(ftext)
 
                     if LOGSPAMMER:
-                        await check.respond(
-                            "`Sorry, my userbot has crashed.\
-                        \nThe error logs are stored in the userbot's log chat.`"
+                        await check.edit(
+                            "`Sorry, my userbot has crashed.\nThe error logs are stored in the userbot's log chat.`"
                         )
 
-                    await check.client.send_file(send_to,
-                                                 "error.log",
-                                                 caption=text)
-                    remove("error.log")
+                        log = codecs.open("error.log", "r", encoding="utf-8")
+                        data = log.read()
+                        key = (
+                            requests.post(
+                                "https://nekobin.com/api/documents",
+                                json={"content": data},
+                            )
+                            .json()
+                            .get("result")
+                            .get("key")
+                        )
+                        url = f"https://nekobin.com/raw/{key}"
+                        anu = f"{text}\n`Here the error:`\nPasted to: [Nekobin]({url})"
+                        await check.client.send_message(send_to, anu)
+                        remove("error.log")
             else:
                 pass
 
