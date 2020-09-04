@@ -339,7 +339,7 @@ async def lastname(steal):
                 return
             if r.text.startswith("Name"):
                 respond = await conv.get_response()
-                await steal.edit(f"{r.message}")
+                await steal.edit(f"`{r.message}`")
                 await steal.client.delete_messages(
                     conv.chat_id, [msg.id, r.id, response.id, respond.id]
                 )
@@ -354,7 +354,7 @@ async def lastname(steal):
                 return
             else:
                 respond = await conv.get_response()
-                await steal.edit(f"{response.message}")
+                await steal.edit(f"`{response.message}`")
             await steal.client.delete_messages(
                 conv.chat_id, [msg.id, r.id, response.id, respond.id]
             )
