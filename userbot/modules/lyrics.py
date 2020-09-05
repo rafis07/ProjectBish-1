@@ -53,7 +53,7 @@ async def lyrics(lyric):
             .get("key")
         )
         url = f"https://nekobin.com/raw/{key}"
-        await lyric.edit(f"`Here the lyrics:`\n\nPasted to: [Nekobin]({url})")
+        await lyric.edit(f"`Here the lyrics:`\n\n[{artist} - {song}]({url})")
         os.remove("lyrics.txt")
         return True
     else:
