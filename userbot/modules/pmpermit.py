@@ -1,24 +1,33 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
 #
-# Licensed under the Raphielscape Public License, Version 1.c (the "License");
+# Licensed under the Raphielscape Public License, Version 1.d (the "License");
 # you may not use this file except in compliance with the License.
 #
 """Userbot module for keeping control who PM you."""
 
 from sqlalchemy.exc import IntegrityError
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
+from telethon.tl.functions.messages import ReportSpamRequest
 from telethon.tl.types import User
 
-from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, COUNT_PM, LASTMSG, PM_AUTO_BAN
+from userbot import (
+    BOTLOG,
+    BOTLOG_CHATID,
+    CMD_HELP,
+    COUNT_PM,
+    LASTMSG,
+    LOGS,
+    PM_AUTO_BAN,
+)
 from userbot.events import register
 
 # ========================= CONSTANTS ============================
 DEF_UNAPPROVED_MSG = (
-    "`I haven't approved you to PM yet.\n`"
-    "`wait for me to approve your PM.\n`"
-    "`Until then, don't spam My PM or you'll get blocked...\n`"
-    "`CAPICHE?\n\n`"
-    "`-Userbot`"
+    "I haven't approved you to PM yet.\n"
+    "wait for me to approve your PM.\n"
+    "Until then, don't spam My PM or you'll get blocked...\n"
+    "CAPICHE?\n\n"
+    "-Userbot"
 )
 # =================================================================
 
@@ -86,17 +95,28 @@ async def permitpm(event):
                     del LASTMSG[event.chat_id]
                 except KeyError:
                     if BOTLOG:
-                        name = await event.client.get_entity(event.chat_id)
-                        name0 = str(name.first_name)
                         await event.client.send_message(
                             BOTLOG_CHATID,
-                            "["
-                            + name0
-                            + "](tg://user?id="
-                            + str(event.chat_id)
-                            + ")"
-                            + " was just another retarded nibba",
+                            "Count PM is seemingly going retard, plis restart bot!",
                         )
+                    LOGS.info("CountPM wen't rarted boi")
+                    return
+
+                await event.client(BlockRequest(event.chat_id))
+                await event.client(ReportSpamRequest(peer=event.chat_id))
+
+                if BOTLOG:
+                    name = await event.client.get_entity(event.chat_id)
+                    name0 = str(name.first_name)
+                    await event.client.send_message(
+                        BOTLOG_CHATID,
+                        "["
+                        + name0
+                        + "](tg://user?id="
+                        + str(event.chat_id)
+                        + ")"
+                        + " was just another retarded nibba",
+                    )
 
 
 @register(disable_edited=True, outgoing=True, disable_errors=True)
@@ -155,7 +175,8 @@ async def notifoff(noff_event):
     try:
         from userbot.modules.sql_helper.globals import addgvar
     except AttributeError:
-        return await noff_event.edit("`Running on Non-SQL mode!`")
+        await noff_event.edit("`Running on Non-SQL mode!`")
+        return
     addgvar("NOTIF_OFF", True)
     await noff_event.edit("`Notifications from unapproved PM's are silenced!`")
 
@@ -166,7 +187,8 @@ async def notifon(non_event):
     try:
         from userbot.modules.sql_helper.globals import delgvar
     except AttributeError:
-        return await non_event.edit("`Running on Non-SQL mode!`")
+        await non_event.edit("`Running on Non-SQL mode!`")
+        return
     delgvar("NOTIF_OFF")
     await non_event.edit("`Notifications from unapproved PM's unmuted!`")
 
@@ -178,7 +200,8 @@ async def approvepm(apprvpm):
         from userbot.modules.sql_helper.globals import gvarstatus
         from userbot.modules.sql_helper.pm_permit_sql import approve
     except AttributeError:
-        return await apprvpm.edit("`Running on Non-SQL mode!`")
+        await apprvpm.edit("`Running on Non-SQL mode!`")
+        return
 
     if apprvpm.reply_to_msg_id:
         reply = await apprvpm.get_reply_message()
@@ -207,7 +230,8 @@ async def approvepm(apprvpm):
     try:
         approve(uid)
     except IntegrityError:
-        return await apprvpm.edit("`User may already be approved.`")
+        await apprvpm.edit("`User may already be approved.`")
+        return
 
     await apprvpm.edit(f"[{name0}](tg://user?id={uid}) `approved to PM!`")
 
@@ -223,14 +247,15 @@ async def disapprovepm(disapprvpm):
     try:
         from userbot.modules.sql_helper.pm_permit_sql import dissprove
     except BaseException:
-        return await disapprvpm.edit("`Running on Non-SQL mode!`")
+        await disapprvpm.edit("`Running on Non-SQL mode!`")
+        return
 
     if disapprvpm.reply_to_msg_id:
         reply = await disapprvpm.get_reply_message()
         replied_user = await disapprvpm.client.get_entity(reply.from_id)
         aname = replied_user.id
         name0 = str(replied_user.first_name)
-        dissprove(replied_user.id)
+        dissprove(aname)
     else:
         dissprove(disapprvpm.chat_id)
         aname = await disapprvpm.client.get_entity(disapprvpm.chat_id)
@@ -256,7 +281,7 @@ async def blockpm(block):
         replied_user = await block.client.get_entity(reply.from_id)
         aname = replied_user.id
         name0 = str(replied_user.first_name)
-        await block.client(BlockRequest(replied_user.id))
+        await block.client(BlockRequest(aname))
         await block.edit("`You've been blocked!`")
         uid = replied_user.id
     else:
