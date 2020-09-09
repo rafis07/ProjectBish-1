@@ -39,8 +39,7 @@
       "required": true
     },
     "HEROKU_APP_NAME": {
-      "description": "Add the Heroku app name here. It helps with userbot updates.",
-      "value": "",
+      "description": "Enter the Heroku app name here (Must an exact same name with your input above). It helps with userbot updates.",
       "required": true
     },
     "UPSTREAM_REPO_URL": {
