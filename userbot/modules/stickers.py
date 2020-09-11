@@ -27,7 +27,7 @@ KANGING_STR = [
     "Eh... Koq bagus... aku curry ahhh :3",
     "Aku curry ya kakak :)",
     "Curry Sticker dulu yee kan",
-    "ehh, mantep nih.....aku ambil ya kaga",
+    "ehh, mantep nih.....aku ambil ya kaka",
     "Bagus eaaaa....\nAmbil ahh....",
     "Ini Sticker aku ambil yaa\nDUARR!",
     "leh ugha ni Sticker\nCurry ahh~",
@@ -339,6 +339,7 @@ async def get_pack_info(event):
 
 @register(outgoing=True, pattern=r"^\.get$")
 async def sticker_to_png(sticker):
+    await sticker.edit("`Converting your sticker to image...`")
     if not sticker.is_reply:
         await sticker.edit("`NULL information to fetch...`")
         return False
