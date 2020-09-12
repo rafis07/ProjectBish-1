@@ -102,7 +102,7 @@ def register(**args):
                     link = "Support chat PM: @adekmaulana"
                     text += "If you want to, you can report it"
                     text += f"- just forward this message to {link}.\n"
-                    text += "Nothing is logged except the fact of error and date\n"
+                    text += "Nothing is logged except the fact of error and date\n\n"
 
                     ftext = "========== DISCLAIMER =========="
                     ftext += "\nThis file uploaded ONLY here,"
@@ -119,13 +119,13 @@ def register(**args):
                     ftext += str(check.text)
                     ftext += "\n\nTraceback info:\n"
                     ftext += str(format_exc())
-                    ftext += "Error text:\n"
+                    ftext += "\n\nError text:\n"
                     ftext += str(sys.exc_info()[1])
                     ftext += "\n\n--------END USERBOT TRACEBACK LOG--------"
 
                     command = "git log --pretty=format:\"%an: %s\" -10"
 
-                    ftext += "\n\nLast 10 commits:\n"
+                    ftext += "\n\n\nLast 10 commits:\n"
 
                     process = await asyncsubshell(command,
                                                   stdout=asyncsub.PIPE,
@@ -136,15 +136,16 @@ def register(**args):
 
                     ftext += result
 
-                    with open("error.log", "w+") as file:
+                    with open("error.txt", "w+") as file:
                         file.write(ftext)
 
                     if LOGSPAMMER:
-                        await check.edit(
-                            "`Sorry, my userbot has crashed.\nThe error logs are stored in the userbot's log chat.`"
+                        await check.respond(
+                            "`Sorry, my userbot has crashed.\
+                        \nThe error logs are stored in the userbot's log chat.`"
                         )
 
-                        log = codecs.open("error.log", "r", encoding="utf-8")
+                        log = codecs.open("error.txt", "r", encoding="utf-8")
                         data = log.read()
                         key = (
                             requests.post(
@@ -156,9 +157,12 @@ def register(**args):
                             .get("key")
                         )
                         url = f"https://nekobin.com/raw/{key}"
-                        anu = f"{text}\n`Here the error:`\nPasted to: [Nekobin]({url})"
-                        await check.client.send_message(send_to, anu)
-                        remove("error.log")
+                        anu = f"{text}Pasted to: [Nekobin]({url})"
+
+                        await check.client.send_file(send_to,
+                                                     "error.txt",
+                                                     caption=anu)
+                        remove("error.txt")
             else:
                 pass
 
