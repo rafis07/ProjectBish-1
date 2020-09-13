@@ -3,36 +3,40 @@
 """
    fallback for main userbot
 """
-import os
 import asyncio
-import requests
-import math
-import shutil
 import codecs
-
+import math
+import os
+import shutil
 from operator import itemgetter
 
+import requests
+
 from userbot import (
-    heroku, fallback,
-    HEROKU_APP_NAME, HEROKU_API_KEY, HEROKU_API_KEY_FALLBACK
+    HEROKU_API_KEY,
+    HEROKU_API_KEY_FALLBACK,
+    HEROKU_APP_NAME,
+    fallback,
+    heroku,
 )
 from userbot.events import register
 
-
 heroku_api = "https://api.heroku.com"
 useragent = (
-    'Mozilla/5.0 (Linux; Android 10; SM-G975F) '
-    'AppleWebKit/537.36 (KHTML, like Gecko) '
-    'Chrome/81.0.4044.117 Mobile Safari/537.36'
+    "Mozilla/5.0 (Linux; Android 10; SM-G975F) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/81.0.4044.117 Mobile Safari/537.36"
 )
 
-@register(outgoing=True,
-           pattern=r"^\.dyno on(?: |$)(.*)")
+
+@register(outgoing=True, pattern=r"^\.dyno on(?: |$)(.*)")
 async def dyno_manage(dyno):
     await dyno.edit("`Sending information...`")
     exe = dyno.pattern_match.group(1)
     if not exe:
-        await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno on <your app name>'`")
+        await dyno.edit(
+            f"`Heroku App not found.\nPlease run` `'.dyno on <your app name>'`"
+        )
         return
     else:
         HEROKU_APP_NAME = exe
@@ -45,7 +49,7 @@ async def dyno_manage(dyno):
             sleep = 1
             dot = "."
             await dyno.edit(text)
-            while (sleep <= 24):
+            while sleep <= 24:
                 await dyno.edit(text + f"`{dot}`")
                 await asyncio.sleep(1)
                 if len(dot) == 3:
@@ -65,13 +69,14 @@ async def dyno_manage(dyno):
             return False
 
 
-@register(outgoing=True,
-           pattern=r"^\.dyno restart(?: |$)(.*)")
+@register(outgoing=True, pattern=r"^\.dyno restart(?: |$)(.*)")
 async def dyno_manage(dyno):
     await dyno.edit("`Sending information...`")
     exe = dyno.pattern_match.group(1)
     if not exe:
-        await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno restart <your app name>'`")
+        await dyno.edit(
+            f"`Heroku App not found.\nPlease run` `'.dyno restart <your app name>'`"
+        )
         return
     else:
         HEROKU_APP_NAME = exe
@@ -80,7 +85,7 @@ async def dyno_manage(dyno):
             Dyno = app.dynos()[0]
         except IndexError:
             """
-               Tell user if main app dyno is not on
+            Tell user if main app dyno is not on
             """
             await dyno.respond(f"⬢**{HEROKU_APP_NAME}** `is not on...`")
             return False
@@ -90,7 +95,7 @@ async def dyno_manage(dyno):
             sleep = 1
             dot = "."
             await dyno.edit(text)
-            while (sleep <= 24):
+            while sleep <= 24:
                 await dyno.edit(text + f"`{dot}`")
                 await asyncio.sleep(1)
                 if len(dot) == 3:
@@ -107,13 +112,14 @@ async def dyno_manage(dyno):
             return True
 
 
-@register(outgoing=True,
-           pattern=r"^\.dyno off(?: |$)(.*)")
+@register(outgoing=True, pattern=r"^\.dyno off(?: |$)(.*)")
 async def dyno_manage(dyno):
     await dyno.edit("`Sending information...`")
     exe = dyno.pattern_match.group(1)
     if not exe:
-        await dyno.edit(f"`Heroku App not found.\nPlease run` `'.dyno off <your app name>'`")
+        await dyno.edit(
+            f"`Heroku App not found.\nPlease run` `'.dyno off <your app name>'`"
+        )
         return
     else:
         HEROKU_APP_NAME = exe
@@ -125,7 +131,7 @@ async def dyno_manage(dyno):
         text = f"`Shutdown` ⬢**{HEROKU_APP_NAME}**"
         sleep = 1
         dot = "."
-        while (sleep <= 3):
+        while sleep <= 3:
             await dyno.edit(text + f"`{dot}`")
             await asyncio.sleep(1)
             dot += "."
@@ -135,43 +141,45 @@ async def dyno_manage(dyno):
         return True
 
 
-@register(outgoing=True,
-          pattern=(
-              "^.dyno "
-              "(usage|deploy|cancel deploy"
-              "|cancel build|get log|help|update)(?: (.*)|$)")
-          )
+@register(
+    outgoing=True,
+    pattern=(
+        "^.dyno "
+        "(usage|deploy|cancel deploy"
+        "|cancel build|get log|help|update)(?: (.*)|$)"
+    ),
+)
 async def dyno_manage(dyno):
     await dyno.edit("`Sending information...`")
     exe = dyno.pattern_match.group(1)
     app = heroku.app(HEROKU_APP_NAME)
     if exe == "usage":
         """
-           Get your account Dyno Usage
+        Get your account Dyno Usage
         """
         await dyno.edit("`Getting information...`")
         headers = {
-            'User-Agent': useragent,
-            'Accept': 'application/vnd.heroku+json; version=3.account-quotas',
+            "User-Agent": useragent,
+            "Accept": "application/vnd.heroku+json; version=3.account-quotas",
         }
         user_id = []
         user_id.append(heroku.account().id)
         if fallback is not None:
             user_id.append(fallback.account().id)
-        msg = ''
+        msg = ""
         for aydi in user_id:
             if fallback is not None and fallback.account().id == aydi:
-                headers['Authorization'] = f'Bearer {HEROKU_API_KEY_FALLBACK}'
+                headers["Authorization"] = f"Bearer {HEROKU_API_KEY_FALLBACK}"
             else:
-                headers['Authorization'] = f'Bearer {HEROKU_API_KEY}'
+                headers["Authorization"] = f"Bearer {HEROKU_API_KEY}"
             path = "/accounts/" + aydi + "/actions/get-quota"
             r = requests.get(heroku_api + path, headers=headers)
             if r.status_code != 200:
                 msg += f"`Cannot get {aydi} information...`\n\n"
                 continue
             result = r.json()
-            quota = result['account_quota']
-            quota_used = result['quota_used']
+            quota = result["account_quota"]
+            quota_used = result["quota_used"]
 
             """
                Quota Limit Left and Used Quota
@@ -185,9 +193,9 @@ async def dyno_manage(dyno):
             """
                Used Quota per/App
             """
-            Apps = result['apps']
+            Apps = result["apps"]
             """Sort from larger usage to lower usage"""
-            Apps = sorted(Apps, key=itemgetter('quota_used'), reverse=True)
+            Apps = sorted(Apps, key=itemgetter("quota_used"), reverse=True)
             if fallback is not None and fallback.account().id == aydi:
                 apps = fallback.apps()
                 msg += "**Dyno Usage fallback-account**:\n\n"
@@ -203,10 +211,10 @@ async def dyno_manage(dyno):
                     )
             else:
                 for App in Apps:
-                    AppName = '__~~Deleted or transferred app~~__'
-                    ID = App.get('app_uuid')
+                    AppName = "__~~Deleted or transferred app~~__"
+                    ID = App.get("app_uuid")
 
-                    AppQuota = App.get('quota_used')
+                    AppQuota = App.get("quota_used")
                     AppQuotaUsed = AppQuota / 60
                     AppPercentage = math.floor(AppQuota * 100 / quota)
                     AppHours = math.floor(AppQuotaUsed / 60)
@@ -232,8 +240,8 @@ async def dyno_manage(dyno):
         await dyno.edit(msg)
     if exe == "deploy":
         home = os.getcwd()
-        if not os.path.isdir('deploy'):
-            os.mkdir('deploy')
+        if not os.path.isdir("deploy"):
+            os.mkdir("deploy")
         txt = (
             "`Oops.. cannot continue deploy due to "
             "some problems occured.`\n\n**LOGTRACE:**\n"
@@ -246,55 +254,51 @@ async def dyno_manage(dyno):
                 break
         if heroku_app is None:
             await dyno.edit(
-                f"{txt}\n"
-                "`Invalid Heroku credentials for deploying userbot dyno.`"
+                f"{txt}\n" "`Invalid Heroku credentials for deploying userbot dyno.`"
             )
             return
         await dyno.edit(
-            '`[HEROKU - MAIN]`\n'
-            '`ProjectDils deploy in progress, please wait...`'
+            "`[HEROKU - MAIN]`\n" "`ProjectDils deploy in progress, please wait...`"
         )
-        os.chdir('deploy')
+        os.chdir("deploy")
         repo = Repo.init()
-        origin = repo.create_remote('deploy', UPSTREAM_REPO_URL)
+        origin = repo.create_remote("deploy", UPSTREAM_REPO_URL)
         try:
             origin.pull(MAIN_REPO_BRANCH)
         except GitCommandError:
             await dyno.edit(
-                f"{txt}\n"
-                f"`Invalid`  **{MAIN_REPO_BRANCH}** `branch name.`"
+                f"{txt}\n" f"`Invalid`  **{MAIN_REPO_BRANCH}** `branch name.`"
             )
-            os.remove('deploy')
+            os.remove("deploy")
             return
         heroku_git_url = heroku_app.git_url.replace(
-            "https://", "https://api:" + HEROKU_API_KEY + "@")
+            "https://", "https://api:" + HEROKU_API_KEY + "@"
+        )
         remote = repo.create_remote("heroku", heroku_git_url)
         remote.push(refspec="HEAD:refs/heads/master", force=True)
-        await dyno.edit('`Successfully deployed!\n'
-                        'Restarting, please wait...`')
+        await dyno.edit("`Successfully deployed!\n" "Restarting, please wait...`")
         os.chdir(home)
-        shutil.rmtree('deploy')
+        shutil.rmtree("deploy")
         return
     elif exe == "cancel deploy" or exe == "cancel build":
         """
-           Only cancel 1 recent builds from activity if build.id not supplied
+        Only cancel 1 recent builds from activity if build.id not supplied
         """
         build_id = dyno.pattern_match.group(2)
         if build_id is None:
-            build = app.builds(order_by='created_at', sort='desc')[0]
+            build = app.builds(order_by="created_at", sort="desc")[0]
         else:
             build = app.builds().get(build_id)
             if build is None:
-                await dyno.edit(
-                    f"`There is no such build.id`:\n**{build_id}**")
+                await dyno.edit(f"`There is no such build.id`:\n**{build_id}**")
                 return False
         if build.status != "pending":
             await dyno.edit("`Zero active builds to cancel...`")
             return False
         headers = {
-            'User-Agent': useragent,
-            'Authorization': f'Bearer {HEROKU_API_KEY}',
-            'Accept': 'application/vnd.heroku+json; version=3.cancel-build',
+            "User-Agent": useragent,
+            "Authorization": f"Bearer {HEROKU_API_KEY}",
+            "Accept": "application/vnd.heroku+json; version=3.cancel-build",
         }
         path = "/apps/" + build.app.id + "/builds/" + build.id
         r = requests.delete(heroku_api + path, headers=headers)
@@ -303,27 +307,29 @@ async def dyno_manage(dyno):
         sleep = 1
         dot = "."
         await asyncio.sleep(2)
-        while (sleep <= 3):
+        while sleep <= 3:
             await dyno.edit(text + f"`{dot}`")
             await asyncio.sleep(1)
             dot += "."
             sleep += 1
-        await dyno.respond(
-            "`[HEROKU]`\n"
-            f"Build: ⬢**{build.app.name}**  `Stopped...`")
+        await dyno.respond("`[HEROKU]`\n" f"Build: ⬢**{build.app.name}**  `Stopped...`")
         await dyno.delete()
         return True
     elif exe == "get log":
         await dyno.edit("`Getting information...`")
-        with open('logs.txt', 'w') as log:
+        with open("logs.txt", "w") as log:
             log.write(app.get_log())
         fd = codecs.open("logs.txt", "r", encoding="utf-8")
         data = fd.read()
-        key = (requests.post("https://nekobin.com/api/documents",
-                             json={"content": data}) .json() .get("result") .get("key"))
+        key = (
+            requests.post("https://nekobin.com/api/documents", json={"content": data})
+            .json()
+            .get("result")
+            .get("key")
+        )
         url = f"https://nekobin.com/raw/{key}"
         await dyno.edit(f"`Here the heroku logs:`\n\nPasted to: [Nekobin]({url})")
-        os.remove('logs.txt')
+        os.remove("logs.txt")
         return True
     elif exe == "help":
         await dyno.edit(
