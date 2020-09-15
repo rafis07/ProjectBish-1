@@ -269,40 +269,53 @@ async def draw_meme_text(image_path, text):
     return webp_file
 
 
-@register(outgoing=True, pattern=r"^\.q")
-async def _(event):
-    if event.fwd_from:
+@register(outgoing=True, pattern=r"^\.q(?: |$)(.*)")
+async def quotess(qotli):
+    if qotli.fwd_from:
         return
-    if not event.reply_to_msg_id:
-        return await event.edit("`Reply to a text message.`")
-    reply_message = await event.get_reply_message()
+    if not qotli.reply_to_msg_id:
+        await qotli.edit("```Reply to any user message.```")
+        return
+    reply_message = await qotli.get_reply_message()
     if not reply_message.text:
-        return await event.edit("`Reply to a text message.`")
+        await qotli.edit("```Reply to text message```")
+        return
     chat = "@QuotLyBot"
-    await event.edit("`Processing...`")
+    reply_message.sender
+    if reply_message.sender.bot:
+        await qotli.edit("```Reply to actual users message.```")
+        return
     try:
+        await qotli.edit("`Processing..`")
         async with bot.conversation(chat) as conv:
             try:
                 response = conv.wait_event(
                     events.NewMessage(incoming=True, from_users=1031952739)
                 )
-                await bot.forward_messages(chat, reply_message)
+                msg = await bot.forward_messages(chat, reply_message)
                 response = await response
                 await bot.send_read_acknowledge(conv.chat_id)
-
             except YouBlockedUserError:
-                return await event.reply("`Please unblock @QuotLyBot and try again`")
-
+                await qotli.reply("```Please unblock @QuotLyBot and try again```")
+                return
             if response.text.startswith("Hi!"):
-                await event.edit(
-                    "`Can you kindly disable your forward privacy settings for good?`"
+                await qotli.edit(
+                    "```Can you kindly disable your forward privacy settings for good?```"
                 )
             else:
-                await event.delete()
-                await bot.forward_messages(event.chat_id, response.message)
-
+                downloaded_file_name = await qotli.client.download_media(
+                    response.media, TEMP_DOWNLOAD_DIRECTORY
+                )
+                await qotli.client.send_file(
+                    qotli.chat_id, downloaded_file_name, reply_to=qotli.reply_to_msg_id
+                )
+                await qotli.delete()
+                await bot.send_read_acknowledge(qotli.chat_id)
+                await qotli.client.delete_messages(conv.chat_id, [msg.id, response.id])
+                os.remove(downloaded_file_name)
     except TimeoutError:
-        return await event.edit("`Error: `@QuotLyBot` is not responding.`")
+        await qotli.edit("`@QuotlyBot doesnt responding`")
+        await qotli.client.delete_messages(conv.chat_id, [msg.id])
 
 
 @register(outgoing=True, pattern=r"^\.hz(:? |$)(.*)?")
