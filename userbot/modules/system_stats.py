@@ -4,7 +4,6 @@
 # you may not use this file except in compliance with the License.
 #
 """Userbot module for getting information about the server."""
-import asyncio
 import platform
 import sys
 from asyncio import create_subprocess_exec as asyncrunapp
@@ -212,20 +211,15 @@ async def amireallyalive(alive):
     if ALIVE_LOGO:
         try:
             logo = ALIVE_LOGO
+            await bot.send_file(alive.chat_id, logo, caption=output)
             await alive.delete()
-            msg = await bot.send_file(alive.chat_id, logo, caption=output)
         except MediaEmptyError:
-            msg = await alive.edit(
+            await alive.edit(
                 output + "\n\n *`The provided logo is invalid."
                 "\nMake sure the link is directed to the logo picture`"
             )
     else:
-        msg = await alive.edit(output)
-    await asyncio.sleep(120)
-    try:
-        await msg.delete()
-    except BaseException:
-        return
+        await alive.edit(output)
 
 
 @register(outgoing=True, pattern=r"^\.aliveu")
