@@ -12,9 +12,8 @@ import os
 import random
 import re
 import textwrap
-from asyncio.exceptions import TimeoutError
 import time
-from random import randint, uniform
+from asyncio.exceptions import TimeoutError
 
 from glitch_this import ImageGlitcher
 from PIL import Image, ImageDraw, ImageFont

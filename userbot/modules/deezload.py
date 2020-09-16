@@ -28,6 +28,7 @@
 # requires: deezloader hachoir Pillow
 # Ported from UniBorg by AnggaR96s
 
+import asyncio
 import os
 import shutil
 import time
@@ -39,6 +40,7 @@ from telethon.tl.types import DocumentAttributeAudio
 
 from userbot import DEEZER_ARL_TOKEN, TEMP_DOWNLOAD_DIRECTORY
 from userbot.events import register
+from userbot.utils import progress
 
 
 @register(outgoing=True, pattern=r"^\.deez (.+?|) (FLAC|MP3\_320|MP3\_256|MP3\_128)")
@@ -178,6 +180,6 @@ async def upload_track(track_location, message):
         attributes=document_attributes,
         progress_callback=lambda d, t: asyncio.get_event_loop().create_task(
             progress(d, t, message, c_time, "[UPLOAD]"),
-        )
+        ),
     )
     os.remove(track_location)
