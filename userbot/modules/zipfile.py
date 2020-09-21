@@ -1,6 +1,3 @@
-"""command: .compress"""
-#
-
 import asyncio
 import os
 import time
@@ -9,15 +6,11 @@ from datetime import date
 
 from userbot import CMD_HELP, TEMP_DOWNLOAD_DIRECTORY, ZIP_DOWNLOAD_DIRECTORY, bot
 from userbot.events import register
-
-# from uniborg.util import admin_cmd, humanbytes, progress, time_formatter
 from userbot.utils import progress
 
 # ====================
 today = date.today()
 # ====================
-
-#  @borg.on(admin_cmd("compress"))
 
 
 @register(outgoing=True, pattern=r"^\.compress(?: |$)(.*)")
